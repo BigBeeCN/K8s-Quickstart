@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+type: Opaque
+stringData:
+  DB_PASSWORD: "super-secret-password-2026"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  custom-nginx.conf: |
+    server {
+        listen 80;
+        location / {
+            default_type text/plain;
+            return 200 'Configured by Kubernetes ConfigMap!\n';
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: advanced-nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: advanced-nginx
+  template:
+    metadata:
+      labels:
+        app: advanced-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        env:
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: DB_PASSWORD
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: custom-nginx.conf
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: app-config

@@ -11,63 +11,8 @@
     brew install kubectl kind
     ```
 ## 正式开始
-### 拉起集群与初次部署
-1. 打开 **OrbStack** 并完成首次引导，看到状态栏图标就是底层容器引擎在线，让它在后台运行即可。 
-2. 选择一个本地文件夹作为作为工作目录，新建一个文件，命名为 `kind-cluster.yaml` ，填入以下内容：
-    ```YAML
-    kind: Cluster
-    apiVersion: kind.x-k8s.io/v1alpha4
-    nodes:
-      - role: control-plane
-      - role: worker
-      - role: worker
-    ```
-3. 在终端中执行一下命令拉起集群：
-    ```Bash
-    kind create cluster --config kind-cluster.yaml --name mac-k8s
-    ```
-4. 等待进度条跑完，看到 `mac-k8s` 集群上线。接着新建一个文件，命名为 `nginx-demo.yaml` ，填入以下内容：
-    ```YAML
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: my-nginx
-    spec:
-      replicas: 2
-      selector:
-        matchLabels:
-          app: nginx
-      template:
-        metadata:
-          labels:
-            app: nginx
-        spec:
-          containers:
-          - name: nginx
-            image: nginx:latest
-            ports:
-            - containerPort: 80
-    ---
-    apiVersion: v1
-    kind: Service
-    metadata:
-      name: nginx-service
-    spec:
-      selector:
-        app: nginx
-      ports:
-        - port: 80
-          targetPort: 80
-    ```
-5. 在终端中执行部署命令：
-    ```Bash
-    kubectl apply -f nginx-demo.yaml
-    ```
-    等待几分钟后，应用应该已经跑在 k8s 的内网里了。可以把它穿透到本地浏览器来看一眼，在终端中接着执行下面的命令：
-    ```Bash
-    kubectl port-forward service/nginx-service 8080:80
-    ```
-6. 打开Mac本地的浏览器，访问 `http://localhost:8080` 。如果看到了 "Welcome to nginx!"的类似界面，那么就代表第一个应用部署成功了。
+### [拉起集群与初次部署](1.md)
+
 ### 核心对象与网络进阶 (Core Objects & Networking)
 - 在实际生产环境中，应用代码与配置必须解耦。硬编码密码或配置文件会导致每次修改都需要重新构建镜像，这违背了 SRE 的基本运维原则。
 1. 下面将使用单一 YAML 文件部署一个包含配置注入与机密管理的复合架构。

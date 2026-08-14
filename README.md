@@ -1,8 +1,8 @@
 # k8s 浅入门（Apple Silicon）
 
-# 前情提要
+## 前情提要
 对互联网云服务等行业有过一定了解的朋友，肯定都知道掌握k8s容器化技术，是踏入云原生大门的敲门砖。k8s 全称 Kubernetes，是谷歌公司基于自家多年的生产经验，并结合社区中最先进的理念和实践，打造出来的一款开源系统，主要用于自动化容器化应用的部署、扩展和管理。笔者以手头上的一台 Macbook Air 为准，对 k8s 进行简单的入门学习。
-# 准备工作
+## 准备工作
 1. 首先选择适合你自己的一款代码编辑器，因为 k8s 的各种资源都是通过 YAML 文件定义的，而 YAML 对缩进极其严格，如果用纯终端工具编辑会比较麻烦。我自己使用的是 VS Code + YAML 扩展插件。
 2. 其次还需要部署好本地的 Docker 环境，建议放弃沉重的 Docker Desktop，在 Mac 上使用更轻量、底层网络优化更好的 **OrbStack** 作为容器引擎。
 3. 最后安装 k8s 的两个核心命令行工具：`kubectl` 和 `kind` 。
@@ -10,8 +10,8 @@
     ```Bash
     brew install kubectl kind
     ```
-# 正式开始
-## 拉起集群与初次部署
+## 正式开始
+### 拉起集群与初次部署
 1. 打开 **OrbStack** 并完成首次引导，看到状态栏图标就是底层容器引擎在线，让它在后台运行即可。 
 2. 选择一个本地文件夹作为作为工作目录，新建一个文件，命名为 `kind-cluster.yaml` ，填入以下内容：
     ```YAML
@@ -68,7 +68,7 @@
     kubectl port-forward service/nginx-service 8080:80
     ```
 6. 打开Mac本地的浏览器，访问 `http://localhost:8080` 。如果看到了 "Welcome to nginx!"的类似界面，那么就代表第一个应用部署成功了。
-## 核心对象与网络进阶 (Core Objects & Networking)
+### 核心对象与网络进阶 (Core Objects & Networking)
 - 在实际生产环境中，应用代码与配置必须解耦。硬编码密码或配置文件会导致每次修改都需要重新构建镜像，这违背了 SRE 的基本运维原则。
 1. 下面将使用单一 YAML 文件部署一个包含配置注入与机密管理的复合架构。
     在工作目录中新建文件并命名为 `advanced-nginx.yaml` ，填入以下内容：
@@ -261,7 +261,7 @@
     3.  **BackOff (退避延迟)** ：如果无限循环秒级重启，会极大地消耗服务器的 CPU 和磁盘 I/O ；因此， Kubernetes 引入了”指数退避“机制（等待 10 秒、 20 秒、 40 秒...直至 5 分钟）；在这个等待重启的期间， Pod 的状态就是 `CrashLoopBackOff` 
     在 `advanced-nginx.yaml` 中进行相应的修正并重新部署，使 Pod 恢复至正常运行状态
 
-## SRE 可观测性实践 (Observability Ecosystem)
+### SRE 可观测性实践 (Observability Ecosystem)
 在生产环境中，应用“活着”（Running）并不代表“活得好”；如果 Nginx 突然占用了 100% 的 CPU ，或者内存泄露即将导致服务器崩溃，单靠 `kubectl get pods` 是无法提前预警的； SRE 需要一双“透视眼”，这就是可观测性。
 可观测性体系通常包含三大支柱： **指标(Metrics)、日志(Logs)和链路追踪(Traces)** 。
 - 先从最基础也是最重要的 **资源指标(Metrics)** 开始。
